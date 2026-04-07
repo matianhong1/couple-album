@@ -5,6 +5,8 @@ import { CATEGORY_META } from "@/lib/constants";
 import { fetchPublishedPhotos } from "@/lib/photos";
 import { Category } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+
 const validCategories: Category[] = ["life", "food", "travel"];
 
 type Props = {

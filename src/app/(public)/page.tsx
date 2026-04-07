@@ -2,6 +2,8 @@
 import SiteFooter from "@/components/SiteFooter";
 import { fetchPublishedPhotos } from "@/lib/photos";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const photos = await fetchPublishedPhotos();
 
