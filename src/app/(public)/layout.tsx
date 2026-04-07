@@ -14,9 +14,9 @@ export default function PublicLayout({
             {SITE_TITLE}
           </Link>
           <nav className="flex items-center gap-2 text-sm md:gap-6 md:text-base">
-            <a href="/#categories" className="rounded-full px-3 py-1.5 transition hover:bg-[#fde8ef]">
+            <Link href="/#categories" className="rounded-full px-3 py-1.5 transition hover:bg-[#fde8ef]">
               分类
-            </a>
+            </Link>
             <Link href="/studio" className="rounded-full bg-[#f3c9d8] px-4 py-1.5 text-[#563844] transition hover:-translate-y-0.5 hover:bg-[#efbfd0]">
               上传图片
             </Link>

@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { Session } from "@supabase/supabase-js";
 import { getSupabaseClient } from "@/lib/supabaseClient";
@@ -39,10 +39,7 @@ function rowToPhoto(row: PhotoRow): Photo {
 }
 
 function sanitizeFilename(name: string): string {
-  return name
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-zA-Z0-9._-]/g, "");
+  return name.trim().replace(/\s+/g, "-").replace(/[^a-zA-Z0-9._-]/g, "");
 }
 
 function fallbackTitleFromFilename(name: string): string {
@@ -70,6 +67,22 @@ export default function UploadPanel() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadProgressText, setUploadProgressText] = useState("");
 
+  const loadPhotos = useCallback(async () => {
+    if (!supabase) return;
+
+    const { data, error } = await supabase
+      .from("photos")
+      .select("id, category, title, description, image_url, thumb_url, taken_at, is_published, created_at")
+      .order("created_at", { ascending: false });
+
+    if (error || !data) {
+      setMessage(error?.message ?? "读取图片失败");
+      return;
+    }
+
+    setPhotos(data.map((row) => rowToPhoto(row as PhotoRow)));
+  }, [supabase]);
+
   useEffect(() => {
     if (!supabase) {
       setLoading(false);
@@ -93,23 +106,7 @@ export default function UploadPanel() {
   useEffect(() => {
     if (!session) return;
     void loadPhotos();
-  }, [session]);
-
-  async function loadPhotos() {
-    if (!supabase) return;
-
-    const { data, error } = await supabase
-      .from("photos")
-      .select("id, category, title, description, image_url, thumb_url, taken_at, is_published, created_at")
-      .order("created_at", { ascending: false });
-
-    if (error || !data) {
-      setMessage(error?.message ?? "读取图片失败");
-      return;
-    }
-
-    setPhotos(data.map((row) => rowToPhoto(row as PhotoRow)));
-  }
+  }, [session, loadPhotos]);
 
   async function login(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -453,7 +450,9 @@ export default function UploadPanel() {
                   rows={2}
                   className="w-full rounded-lg border border-[#f1d5e0] px-3 py-2 text-sm"
                 />
-                <div className="text-xs text-[#916678]">分类：{categoryOptions.find((item) => item.value === photo.category)?.label} | 日期：{photo.takenAt ?? "未设置"}</div>
+                <div className="text-xs text-[#916678]">
+                  分类：{categoryOptions.find((item) => item.value === photo.category)?.label} | 日期：{photo.takenAt ?? "未设置"}
+                </div>
               </div>
               <div className="flex flex-col gap-2">
                 <button
